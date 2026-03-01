@@ -18,6 +18,9 @@ interface ImportantDayDao {
     @Query("SELECT * FROM important_days WHERE reminderEnabled = 1")
     suspend fun getDaysWithReminders(): List<ImportantDayEntity>
 
+    @Query("SELECT * FROM important_days WHERE personId = :personId ORDER BY date ASC")
+    fun getDaysByPersonId(personId: Long): Flow<List<ImportantDayEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDay(day: ImportantDayEntity): Long
 

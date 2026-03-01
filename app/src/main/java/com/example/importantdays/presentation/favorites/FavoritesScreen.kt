@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,8 @@ fun FavoritesScreen(
         getFavoriteDaysUseCase = app.container.getFavoriteDaysUseCase,
         toggleFavoriteUseCase = app.container.toggleFavoriteUseCase
     )
+    val persons by app.container.personRepository.getAllPersons().collectAsState(initial = emptyList())
+    val personNameMap = remember(persons) { persons.associate { it.id to it.name } }
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -58,6 +61,7 @@ fun FavoritesScreen(
                     items(state.days, key = { it.id }) { day ->
                         ImportantDayCard(
                             day = day,
+                            ownerName = day.personId?.let(personNameMap::get),
                             onCardClick = { onNavigateToDetail(day.id) },
                             onFavoriteClick = { viewModel.toggleFavorite(day) }
                         )

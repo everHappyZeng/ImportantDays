@@ -10,6 +10,7 @@ import com.example.importantdays.presentation.addedit.AddEditScreen
 import com.example.importantdays.presentation.detail.DetailScreen
 import com.example.importantdays.presentation.favorites.FavoritesScreen
 import com.example.importantdays.presentation.home.HomeScreen
+import com.example.importantdays.presentation.persons.PersonsScreen
 import com.example.importantdays.presentation.profile.ProfileScreen
 
 @Composable
@@ -41,7 +42,17 @@ fun NavGraph(
         }
 
         composable(Screen.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(
+                onNavigateToPersons = {
+                    navController.navigate(Screen.Persons.route)
+                }
+            )
+        }
+
+        composable(Screen.Persons.route) {
+            PersonsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         composable(

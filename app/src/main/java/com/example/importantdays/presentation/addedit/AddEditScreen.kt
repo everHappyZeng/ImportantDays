@@ -28,12 +28,14 @@ fun AddEditScreen(
     val viewModel = AddEditViewModel(
         dayId = dayId,
         repository = app.container.repository,
+        personRepository = app.container.personRepository,
         saveImportantDayUseCase = app.container.saveImportantDayUseCase
     )
 
     val uiState by viewModel.uiState.collectAsState()
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var personMenuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -70,6 +72,47 @@ fun AddEditScreen(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
+
+            Box {
+                val selectedPersonName = uiState.persons
+                    .firstOrNull { it.id == uiState.personId }
+                    ?.name ?: "不关联任何人"
+                OutlinedTextField(
+                    value = selectedPersonName,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("关联人员") },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    trailingIcon = {
+                        TextButton(onClick = { personMenuExpanded = true }) {
+                            Text("选择")
+                        }
+                    }
+                )
+
+                DropdownMenu(
+                    expanded = personMenuExpanded,
+                    onDismissRequest = { personMenuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("不关联任何人") },
+                        onClick = {
+                            viewModel.onPersonChange(null)
+                            personMenuExpanded = false
+                        }
+                    )
+                    uiState.persons.forEach { person ->
+                        DropdownMenuItem(
+                            text = { Text(person.name) },
+                            onClick = {
+                                viewModel.onPersonChange(person.id)
+                                personMenuExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
 
             OutlinedButton(
                 onClick = { showDatePicker = true },

@@ -20,6 +20,7 @@ data class ImportantDay(
     ),
     val timeEnabled: Boolean = false,
     val time: LocalTime? = null,
+    val personId: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 ) {
