@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileScreen(
     onNavigateToPersons: () -> Unit,
+    onNavigateToRecords: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -87,6 +88,35 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
+                        text = "功能入口",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Button(
+                        onClick = onNavigateToPersons,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("👥 管理人员")
+                    }
+
+                    Button(
+                        onClick = onNavigateToRecords,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("📝 送礼/活动记录")
+                    }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
                         text = "通知测试",
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -95,12 +125,6 @@ fun ProfileScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Button(
-                        onClick = onNavigateToPersons,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("管理人员")
-                    }
 
                     Button(
                         onClick = {

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -90,5 +91,6 @@ enum class AppDestinations(
 ) {
     HOME("Home", Icons.Default.Home, Screen.Home.route),
     FAVORITES("Favorites", Icons.Default.Favorite, Screen.Favorites.route),
+    RECORDS("Records", Icons.Default.List, Screen.Records.route),
     PROFILE("Profile", Icons.Default.AccountBox, Screen.Profile.route),
 }

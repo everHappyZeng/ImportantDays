@@ -33,7 +33,7 @@ class PersonsViewModel(
         }
     }
 
-    fun addPerson(name: String, notes: String, onDone: () -> Unit) {
+    fun addPerson(name: String, notes: String, hobbies: List<String>, onDone: () -> Unit) {
         if (name.isBlank()) {
             return
         }
@@ -41,7 +41,8 @@ class PersonsViewModel(
             val person = Person(
                 name = name.trim(),
                 avatar = null,
-                notes = notes.trim()
+                notes = notes.trim(),
+                hobbies = hobbies
             )
             personRepository.insertPerson(person)
             onDone()
@@ -54,9 +55,25 @@ class PersonsViewModel(
         }
         viewModelScope.launch {
             if (person.id == 0L) {
-                personRepository.insertPerson(person.copy(name = person.name.trim(), notes = person.notes.trim()))
+                personRepository.insertPerson(person.copy(
+                    name = person.name.trim(),
+                    notes = person.notes.trim()
+                ))
             } else {
-                personRepository.updatePerson(person.copy(name = person.name.trim(), notes = person.notes.trim()))
+                personRepository.updatePerson(person.copy(
+                    name = person.name.trim(),
+                    notes = person.notes.trim()
+                ))
+            }
+            onDone()
+        }
+    }
+
+    fun updatePersonHobbies(personId: Long, hobbies: List<String>, onDone: () -> Unit) {
+        viewModelScope.launch {
+            val person = personRepository.getPersonById(personId)
+            person?.let {
+                personRepository.updatePerson(it.copy(hobbies = hobbies))
             }
             onDone()
         }
