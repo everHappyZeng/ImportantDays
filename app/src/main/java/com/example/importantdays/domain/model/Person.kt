@@ -5,5 +5,6 @@ data class Person(
     val name: String,
     val avatar: String? = null,
     val notes: String = "",
+    val hobbies: List<String> = listOf(),
     val createdAt: Long = System.currentTimeMillis()
 )

@@ -7,18 +7,20 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.importantdays.data.model.ActivityRecordEntity
 import com.example.importantdays.data.model.ImportantDayEntity
 import com.example.importantdays.data.model.PersonEntity
 
 @Database(
-    entities = [ImportantDayEntity::class, PersonEntity::class],
-    version = 3,
+    entities = [ImportantDayEntity::class, PersonEntity::class, ActivityRecordEntity::class],
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class ImportantDaysDatabase : RoomDatabase() {
     abstract fun importantDayDao(): ImportantDayDao
     abstract fun personDao(): PersonDao
+    abstract fun activityRecordDao(): ActivityRecordDao
 
     companion object {
         @Volatile
@@ -90,6 +92,35 @@ abstract class ImportantDaysDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Add hobbies column to persons table
+                db.execSQL("ALTER TABLE persons ADD COLUMN hobbies TEXT NOT NULL DEFAULT '[]'")
+
+                // Create activity_records table
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `activity_records` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `personId` INTEGER NOT NULL,
+                        `importantDayId` INTEGER,
+                        `activityType` TEXT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `description` TEXT NOT NULL,
+                        `date` TEXT NOT NULL,
+                        `notes` TEXT NOT NULL,
+                        `createdAt` INTEGER NOT NULL,
+                        FOREIGN KEY(`personId`) REFERENCES `persons`(`id`) ON DELETE CASCADE,
+                        FOREIGN KEY(`importantDayId`) REFERENCES `important_days`(`id`) ON DELETE SET NULL
+                    )
+                    """.trimIndent()
+                )
+
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_activity_records_personId` ON `activity_records` (`personId`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_activity_records_importantDayId` ON `activity_records` (`importantDayId`)")
+            }
+        }
+
         fun getDatabase(context: Context): ImportantDaysDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -97,7 +128,7 @@ abstract class ImportantDaysDatabase : RoomDatabase() {
                     ImportantDaysDatabase::class.java,
                     "important_days_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                 INSTANCE = instance
                 instance

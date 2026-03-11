@@ -1,8 +1,10 @@
 package com.example.importantdays.util
 
+import com.example.importantdays.data.model.ActivityRecordEntity
 import com.example.importantdays.data.model.ImportantDayEntity
 import com.example.importantdays.data.model.PersonEntity
 import com.example.importantdays.data.model.PersonWithNextDaySummary
+import com.example.importantdays.domain.model.ActivityRecord
 import com.example.importantdays.domain.model.ImportantDay
 import com.example.importantdays.domain.model.NotificationChannel
 import com.example.importantdays.domain.model.Person
@@ -54,6 +56,7 @@ fun PersonEntity.toDomain(): Person {
         name = name,
         avatar = avatar,
         notes = notes,
+        hobbies = hobbies,
         createdAt = createdAt
     )
 }
@@ -63,6 +66,35 @@ fun Person.toEntity(): PersonEntity {
         id = id,
         name = name,
         avatar = avatar,
+        notes = notes,
+        hobbies = hobbies,
+        createdAt = createdAt
+    )
+}
+
+fun ActivityRecordEntity.toDomain(): ActivityRecord {
+    return ActivityRecord(
+        id = id,
+        personId = personId,
+        importantDayId = importantDayId,
+        activityType = activityType,
+        title = title,
+        description = description,
+        date = date,
+        notes = notes,
+        createdAt = createdAt
+    )
+}
+
+fun ActivityRecord.toEntity(): ActivityRecordEntity {
+    return ActivityRecordEntity(
+        id = id,
+        personId = personId,
+        importantDayId = importantDayId,
+        activityType = activityType,
+        title = title,
+        description = description,
+        date = date,
         notes = notes,
         createdAt = createdAt
     )

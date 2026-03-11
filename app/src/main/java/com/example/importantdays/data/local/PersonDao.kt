@@ -1,6 +1,10 @@
 package com.example.importantdays.data.local
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import com.example.importantdays.data.model.PersonEntity
 import com.example.importantdays.data.model.PersonWithNextDaySummary
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +21,7 @@ interface PersonDao {
             p.name AS person_name,
             p.avatar AS person_avatar,
             p.notes AS person_notes,
+            p.hobbies AS person_hobbies,
             p.createdAt AS person_createdAt,
             d.id AS nextDayId,
             d.title AS nextDayTitle,
