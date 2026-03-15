@@ -23,6 +23,8 @@ import com.example.importantdays.presentation.profile.ProfileScreen
 import com.example.importantdays.presentation.records.ActivityRecordsScreen
 import com.example.importantdays.presentation.records.AddEditRecordScreen
 import com.example.importantdays.presentation.records.ActivityRecordsViewModel
+import com.example.importantdays.presentation.contacts.ImportContactsScreen
+import com.example.importantdays.presentation.contacts.ImportContactsViewModel
 
 @Composable
 fun NavGraph(
@@ -67,6 +69,9 @@ fun NavGraph(
                 },
                 onNavigateToRecords = {
                     navController.navigate(Screen.Records.route)
+                },
+                onNavigateToImportContacts = {
+                    navController.navigate(Screen.ImportContacts.route)
                 }
             )
         }
@@ -185,6 +190,23 @@ fun NavGraph(
                 onNavigateToAddRecord = { pId, dayId ->
                     navController.navigate(Screen.AddEditRecord.createRoute(0, pId, dayId))
                 }
+            )
+        }
+
+        composable(Screen.ImportContacts.route) {
+            val context = LocalContext.current
+            val app = context.applicationContext as ImportantDaysApplication
+            val viewModel = ImportContactsViewModel(
+                importContactsUseCase = com.example.importantdays.domain.usecase.ImportContactsBirthdayUseCase(
+                    context = context,
+                    personRepository = app.container.personRepository,
+                    importantDayRepository = app.container.repository,
+                    saveImportantDayUseCase = app.container.saveImportantDayUseCase
+                )
+            )
+            ImportContactsScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

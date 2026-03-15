@@ -71,6 +71,9 @@ dependencies {
     // Lunar calendar
     implementation(libs.lunar4j)
 
+    // Contacts
+    implementation(libs.androidx.contacts)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

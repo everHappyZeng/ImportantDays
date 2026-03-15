@@ -19,4 +19,5 @@ sealed class Screen(val route: String) {
     object PersonDetail : Screen("person_detail/{personId}") {
         fun createRoute(personId: Long) = "person_detail/$personId"
     }
+    object ImportContacts : Screen("import_contacts")
 }
