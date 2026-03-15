@@ -3,11 +3,13 @@ package com.example.importantdays.presentation.addedit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.importantdays.data.model.DayType
+import com.example.importantdays.data.model.DateType
 import com.example.importantdays.domain.model.ImportantDay
 import com.example.importantdays.domain.model.Person
 import com.example.importantdays.domain.repository.ImportantDayRepository
 import com.example.importantdays.domain.repository.PersonRepository
 import com.example.importantdays.domain.usecase.SaveImportantDayUseCase
+import com.example.importantdays.util.DateUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,6 +50,10 @@ class AddEditViewModel(
                     description = day.description,
                     date = day.date,
                     dayType = day.dayType,
+                    dateType = day.dateType,
+                    lunarMonth = day.lunarMonth,
+                    lunarDay = day.lunarDay,
+                    isLunarLeapMonth = day.isLunarLeapMonth,
                     reminderEnabled = day.reminderEnabled,
                     reminderDaysBefore = day.reminderDaysBefore,
                     timeEnabled = day.timeEnabled,
@@ -73,7 +79,47 @@ class AddEditViewModel(
     }
 
     fun onDayTypeChange(dayType: DayType) {
-        _uiState.value = _uiState.value.copy(dayType = dayType)
+        // 如果选择农历重复，自动切换到农历模式
+        val newDateType = if (dayType == DayType.LUNAR_YEARLY_REPEAT && _uiState.value.dateType != DateType.LUNAR) {
+            DateType.LUNAR
+        } else {
+            _uiState.value.dateType
+        }
+        _uiState.value = _uiState.value.copy(dayType = dayType, dateType = newDateType)
+    }
+
+    fun onDateTypeChange(dateType: DateType) {
+        _uiState.value = _uiState.value.copy(dateType = dateType)
+    }
+
+    fun onLunarMonthChange(month: Int) {
+        _uiState.value = _uiState.value.copy(lunarMonth = month)
+    }
+
+    fun onLunarDayChange(day: Int) {
+        _uiState.value = _uiState.value.copy(lunarDay = day)
+    }
+
+    fun onLunarLeapMonthChange(isLeap: Boolean) {
+        _uiState.value = _uiState.value.copy(isLunarLeapMonth = isLeap)
+    }
+
+    /**
+     * 根据农历日期计算对应的公历日期
+     */
+    fun calculateSolarFromLunar() {
+        val state = _uiState.value
+        if (state.dateType == DateType.LUNAR && state.lunarMonth != null && state.lunarDay != null) {
+            val solarDate = DateUtils.solarFromLunar(
+                LocalDate.now().year,
+                state.lunarMonth,
+                state.lunarDay,
+                state.isLunarLeapMonth
+            )
+            if (solarDate != null) {
+                _uiState.value = state.copy(date = solarDate)
+            }
+        }
     }
 
     fun onReminderEnabledChange(enabled: Boolean) {
@@ -99,8 +145,22 @@ class AddEditViewModel(
     fun saveDay(onSuccess: () -> Unit) {
         val state = _uiState.value
         if (state.title.isBlank()) {
-            _uiState.value = state.copy(errorMessage = "Title cannot be empty")
+            _uiState.value = state.copy(errorMessage = "标题不能为空")
             return
+        }
+
+        // 如果是农历日期，计算对应的公历日期
+        var finalDate = state.date
+        if (state.dateType == DateType.LUNAR && state.lunarMonth != null && state.lunarDay != null) {
+            val solarDate = DateUtils.solarFromLunar(
+                LocalDate.now().year,
+                state.lunarMonth,
+                state.lunarDay,
+                state.isLunarLeapMonth
+            )
+            if (solarDate != null) {
+                finalDate = solarDate
+            }
         }
 
         viewModelScope.launch {
@@ -108,8 +168,12 @@ class AddEditViewModel(
                 id = dayId,
                 title = state.title,
                 description = state.description,
-                date = state.date,
+                date = finalDate,
                 dayType = state.dayType,
+                dateType = state.dateType,
+                lunarMonth = if (state.dateType == DateType.LUNAR) state.lunarMonth else null,
+                lunarDay = if (state.dateType == DateType.LUNAR) state.lunarDay else null,
+                isLunarLeapMonth = state.isLunarLeapMonth,
                 personId = state.personId,
                 reminderEnabled = state.reminderEnabled,
                 reminderDaysBefore = state.reminderDaysBefore,
@@ -127,6 +191,10 @@ data class AddEditUiState(
     val description: String = "",
     val date: LocalDate = LocalDate.now(),
     val dayType: DayType = DayType.ONE_TIME,
+    val dateType: DateType = DateType.SOLAR,
+    val lunarMonth: Int? = null,
+    val lunarDay: Int? = null,
+    val isLunarLeapMonth: Boolean = false,
     val personId: Long? = null,
     val persons: List<Person> = emptyList(),
     val reminderEnabled: Boolean = false,

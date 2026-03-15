@@ -29,6 +29,10 @@ data class ImportantDayEntity(
     val description: String = "",
     val date: LocalDate,
     val dayType: DayType,
+    val dateType: DateType = DateType.SOLAR,    // 公历/农历
+    val lunarMonth: Int? = null,                // 农历月份 (1-12)，农历日期时使用
+    val lunarDay: Int? = null,                  // 农历日期 (1-30)，农历日期时使用
+    val isLunarLeapMonth: Boolean = false,       // 是否闰月
     val isFavorite: Boolean = false,
     val reminderEnabled: Boolean = false,
     val reminderDaysBefore: Int = 0,

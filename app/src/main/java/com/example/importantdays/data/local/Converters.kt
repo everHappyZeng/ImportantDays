@@ -2,6 +2,7 @@ package com.example.importantdays.data.local
 
 import androidx.room.TypeConverter
 import com.example.importantdays.data.model.DayType
+import com.example.importantdays.data.model.DateType
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -24,6 +25,16 @@ class Converters {
     @TypeConverter
     fun toDayType(dayTypeString: String): DayType {
         return DayType.valueOf(dayTypeString)
+    }
+
+    @TypeConverter
+    fun fromDateType(dateType: DateType): String {
+        return dateType.name
+    }
+
+    @TypeConverter
+    fun toDateType(dateTypeString: String): DateType {
+        return DateType.valueOf(dateTypeString)
     }
 
     @TypeConverter

@@ -11,7 +11,7 @@ import com.example.importantdays.data.model.PersonEntity
 
 @Database(
     entities = [ImportantDayEntity::class, PersonEntity::class, ActivityRecordEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

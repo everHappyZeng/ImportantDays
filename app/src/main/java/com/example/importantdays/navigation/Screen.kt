@@ -16,4 +16,7 @@ sealed class Screen(val route: String) {
         fun createRoute(recordId: Long = 0, personId: Long = 0, importantDayId: Long = 0) =
             "add_edit_record/$recordId/$personId/$importantDayId"
     }
+    object PersonDetail : Screen("person_detail/{personId}") {
+        fun createRoute(personId: Long) = "person_detail/$personId"
+    }
 }

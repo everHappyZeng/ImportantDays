@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.importantdays.ImportantDaysApplication
 import com.example.importantdays.data.model.DayType
+import com.example.importantdays.data.model.DateType
 import com.example.importantdays.util.DateUtils
 import java.time.LocalDate
 import java.time.LocalTime
@@ -121,7 +122,152 @@ fun AddEditScreen(
                 Text("日期：${uiState.date}")
             }
 
-            Text("日子类型", style = MaterialTheme.typography.titleSmall)
+            // 公历/农历切换
+            Text("日期类型", style = MaterialTheme.typography.titleSmall)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = uiState.dateType == DateType.SOLAR,
+                    onClick = { viewModel.onDateTypeChange(DateType.SOLAR) },
+                    label = { Text("公历") }
+                )
+                FilterChip(
+                    selected = uiState.dateType == DateType.LUNAR,
+                    onClick = { 
+                        viewModel.onDateTypeChange(DateType.LUNAR)
+                        // 默认选择农历正月
+                        if (uiState.lunarMonth == null) {
+                            viewModel.onLunarMonthChange(1)
+                            viewModel.onLunarDayChange(1)
+                        }
+                    },
+                    label = { Text("农历") }
+                )
+            }
+
+            // 农历日期选择
+            if (uiState.dateType == DateType.LUNAR) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text("选择农历日期", style = MaterialTheme.typography.titleSmall)
+                        
+                        // 农历月份选择
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Text("月份：")
+                            var monthExpanded by remember { mutableStateOf(false) }
+                            val months = listOf("正月", "二月", "三月", "四月", "五月", "六月", 
+                                              "七月", "八月", "九月", "十月", "冬月", "腊月")
+                            ExposedDropdownMenuBox(
+                                expanded = monthExpanded,
+                                onExpandedChange = { monthExpanded = it },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                OutlinedTextField(
+                                    value = months.getOrElse(uiState.lunarMonth ?: 1 - 1) { "正月" },
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = monthExpanded) },
+                                    modifier = Modifier.menuAnchor()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = monthExpanded,
+                                    onDismissRequest = { monthExpanded = false }
+                                ) {
+                                    months.forEachIndexed { index, month ->
+                                        DropdownMenuItem(
+                                            text = { Text(month) },
+                                            onClick = {
+                                                viewModel.onLunarMonthChange(index + 1)
+                                                monthExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // 农历日期选择
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Text("日期：")
+                            var dayExpanded by remember { mutableStateOf(false) }
+                            val days = (1..30).map { 
+                                listOf("初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+                                       "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+                                       "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十")[it - 1]
+                            }
+                            ExposedDropdownMenuBox(
+                                expanded = dayExpanded,
+                                onExpandedChange = { dayExpanded = it },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                OutlinedTextField(
+                                    value = days.getOrElse((uiState.lunarDay ?: 1) - 1) { "初一" },
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dayExpanded) },
+                                    modifier = Modifier.menuAnchor()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = dayExpanded,
+                                    onDismissRequest = { dayExpanded = false }
+                                ) {
+                                    days.forEachIndexed { index, day ->
+                                        DropdownMenuItem(
+                                            text = { Text(day) },
+                                            onClick = {
+                                                viewModel.onLunarDayChange(index + 1)
+                                                dayExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // 闰月开关
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Text("闰月")
+                            Switch(
+                                checked = uiState.isLunarLeapMonth,
+                                onCheckedChange = viewModel::onLunarLeapMonthChange
+                            )
+                        }
+
+                        // 显示农历预览
+                        if (uiState.lunarMonth != null && uiState.lunarDay != null) {
+                            Text(
+                                text = "预览：农历${DateUtils.formatLunarDate(uiState.lunarMonth, uiState.lunarDay, uiState.isLunarLeapMonth)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+
+            Text("重复规则", style = MaterialTheme.typography.titleSmall)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -134,7 +280,12 @@ fun AddEditScreen(
                 FilterChip(
                     selected = uiState.dayType == DayType.YEARLY_REPEAT,
                     onClick = { viewModel.onDayTypeChange(DayType.YEARLY_REPEAT) },
-                    label = { Text("每年重复") }
+                    label = { Text("每年公历") }
+                )
+                FilterChip(
+                    selected = uiState.dayType == DayType.LUNAR_YEARLY_REPEAT,
+                    onClick = { viewModel.onDayTypeChange(DayType.LUNAR_YEARLY_REPEAT) },
+                    label = { Text("每年农历") }
                 )
             }
 

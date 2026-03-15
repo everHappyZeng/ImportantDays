@@ -18,6 +18,7 @@ import com.example.importantdays.presentation.home.HomeScreen
 import com.example.importantdays.presentation.persons.PersonsScreen
 import com.example.importantdays.presentation.persons.PersonsUiState
 import com.example.importantdays.presentation.persons.PersonsViewModel
+import com.example.importantdays.presentation.persons.PersonDetailScreen
 import com.example.importantdays.presentation.profile.ProfileScreen
 import com.example.importantdays.presentation.records.ActivityRecordsScreen
 import com.example.importantdays.presentation.records.AddEditRecordScreen
@@ -72,7 +73,10 @@ fun NavGraph(
 
         composable(Screen.Persons.route) {
             PersonsScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onPersonClick = { personId ->
+                    navController.navigate(Screen.PersonDetail.createRoute(personId))
+                }
             )
         }
 
@@ -165,6 +169,22 @@ fun NavGraph(
                 preselectedImportantDayId = if (importantDayId > 0) importantDayId else null,
                 onNavigateBack = { navController.popBackStack() },
                 onSaveSuccess = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.PersonDetail.route,
+            arguments = listOf(
+                navArgument("personId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val personId = backStackEntry.arguments?.getLong("personId") ?: 0L
+            PersonDetailScreen(
+                personId = personId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAddRecord = { pId, dayId ->
+                    navController.navigate(Screen.AddEditRecord.createRoute(0, pId, dayId))
+                }
             )
         }
     }

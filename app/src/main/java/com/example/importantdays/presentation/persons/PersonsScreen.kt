@@ -60,6 +60,7 @@ import com.example.importantdays.util.DateUtils
 @Composable
 fun PersonsScreen(
     onNavigateBack: () -> Unit,
+    onPersonClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -115,6 +116,9 @@ fun PersonsScreen(
                     items(state.persons, key = { it.person.id }) { personSummary ->
                         PersonCard(
                             personSummary = personSummary,
+                            onClick = {
+                                onPersonClick(personSummary.person.id)
+                            },
                             onEdit = {
                                 editingPerson = personSummary.person
                                 showEditorDialog = true
@@ -166,12 +170,14 @@ fun PersonsScreen(
 @Composable
 private fun PersonCard(
     personSummary: PersonWithNextDay,
+    onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
